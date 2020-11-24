@@ -60,32 +60,28 @@ class SQLToolApi extends SugarApi
 
         if (!isset($args['sql'])) { 
             return array('Error' => 'no arg'); 
-            exit; 
         }
+
         $sql = $args['sql'];
         $return = array();
         $ac = new Account();
         if (substr_count($sql, ';') >= 2) {
-            foreach (explode(';', $sql) as $s) $ac->db->query($s);
+            $sList = explode(';', $sql);
+            foreach($sList as $s) {
+                $ac->db->query($s);
+            }
             $return['sql_num_rows'] = 1;
             $return['sql_fields'] = array('message');
             $return['sql_records'] = array('multiple queries.');
-            return($return);
-            exit;
+            return $return;
         }
         
-        /*
-        if (strpos(strtolower($sql), 'select') === false) {
-            return array('Error' => 'not a select query'); 
-            exit; 
-        }
-        */
         $result = $ac->db->query($sql);
         if (!$result) {
             $return['sql_num_rows'] = 1;
             $return['sql_fields'] = array('Error');
             $return['sql_records'] = array($ac->db->lastDbError());
-            exit; 
+            throw new Exception('Query returned no results');
         }
 
         $num_rows = $result->num_rows;
