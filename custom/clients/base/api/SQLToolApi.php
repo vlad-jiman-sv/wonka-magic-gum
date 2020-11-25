@@ -59,7 +59,7 @@ class SQLToolApi extends SugarApi
         }
 
         if (!isset($args['sql'])) { 
-            return array('Error' => 'no arg'); 
+            throw new SugarApiExceptionError('no arg');
         }
 
         $sql = $args['sql'];
@@ -81,7 +81,7 @@ class SQLToolApi extends SugarApi
             $return['sql_num_rows'] = 1;
             $return['sql_fields'] = array('Error');
             $return['sql_records'] = array($ac->db->lastDbError());
-            throw new Exception('Query returned no results');
+            throw new Exception($ac->db->lastDbError());
         }
 
         $num_rows = $result->num_rows;
@@ -92,18 +92,19 @@ class SQLToolApi extends SugarApi
         while($row = $ac->db->fetchByAssoc($result)) {
             $r = array();
             foreach ($row as $key => $value) {
-                //$r[$key] = $value;
                 array_push($r, $value);
             }
             array_push($return['sql_records'], $r);
             if (count($return['sql_fields']) == 0) {
-                foreach ($row as $key => $value) array_push($return['sql_fields'], $key);
+                foreach ($row as $key => $value) 
+                {
+                    array_push($return['sql_fields'], $key);
+                }
             }
         }
 
-        return($return);
+        return $return;
 
     }
 
 }
-?>
